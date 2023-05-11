@@ -13,12 +13,12 @@ int ehValido(int x , int y){
 
 //função que imprime asteristico de retangulo
 void imprimeAsteristicos(int x, int y){
-    for(int i = 1; i <= x; i++) {
+    for(int i = x; i <= y; i++) {
         printf(" ");
-        for(int j = 1; j <= y; j++){
+        for(int j = y; j <= x; j++){
             printf("*");
         }
-       
+       printf("\n");
     }
 }
 
