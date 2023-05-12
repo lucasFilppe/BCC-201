@@ -14,8 +14,8 @@ int ehValido(int x , int y){
 //função que imprime asteristico de retangulo
 void imprimeAsteristicos(int x, int y){
     for(int i = x; i <= y; i++) {
-        printf(" ");
-        for(int j = y; j <= x; j++){
+        printf("\t");
+        for(int j = 1; j <= i ; j++){
             printf("*");
         }
        printf("\n");
