@@ -16,11 +16,27 @@ void validaQuantidade(int n){
     }
 
     else{
-        printf("Função para ler notas\n");
+        lerNotas(n);
         
+    }   
+}
+
+void lerNotas(int n){
+    float  nota[n], soma = 0;
+    for(int i=0; i<n; i++){
+        printf("Digite a %d nota: ", i + 1);
+        scanf("%d", &nota[i]);
+
+        if(nota[i] >= 0 && nota[i] <= 10){
+            soma += nota[i];
+        }
+        else{
+            printf("Nota invalida\n");
+            printf("Digite a %d nota: ", i + 1);
+            scanf("%d", &nota[i]);
+        }
+        printf("\n")
     }
-    
-    
 }
 int main(){
 
