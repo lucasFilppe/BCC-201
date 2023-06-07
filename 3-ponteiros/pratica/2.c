@@ -1,19 +1,32 @@
 #include <stdio.h>
+#include <math.h>
 
-//função que calcucula o valor das raizes
+//função que calcucula o valor das raizesle
+int calculaRaizes (double *a, double *b, double *c, double *x, double *y){
 
-int calculaRaizes (float *a, float *b, float *c, float *delta, float *x, float *y){
+  double delta = pow((*b), 2) - 4.0  * (*c);
 
-  float *delta = (pow(b, 2) - 4.0 * (*a) * (*c) );
-
-  if (*delta >=  0)
+  if (delta >=  0)
   {
-    *x = (-(*b) + srqt(*delta)) / (2.0 * (*a));
-    *y = (-(*b) + srqt(*delta)) / (2.0 * (*a));
+    *x = (-(*b) + sqrt(delta) / 2.0 * (*a));
+    *y = (-(*b) -sqrt(delta) / 2.0 * (*a));
     return 1;
   }
 
   return 0;
+}
 
+int main(){
+  double a, b ,c , x, y;
+
+  scanf("%lf %lf %lf", &a, &b, &c);
+
+  if(calculaRaizes(&a, &b, &c, &x, &y) == 1)
+  {
+    printf("x1 = %.2lf\n", x);
+    printf("x2 = %.2lf\n", y);
+  }
+  
+  return 0;
 }
 
