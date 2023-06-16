@@ -7,9 +7,10 @@ typedef struct{
 }NovaPessoa; 
 
 //função para inserir uma pessoa
-void inserirPessoa(NovaPessoa p){
+NovaPessoa inserirPessoa(){
     getchar();
 
+    NovaPessoa p;
     printf("Digite o nome da pessoa: ");
     fgets(p.nome, 100, stdin);
     printf("Digite a altura da pessoa: ");
@@ -17,16 +18,36 @@ void inserirPessoa(NovaPessoa p){
     printf("Digite o ano de nascimento: ");
     scanf("%d", &p.anoNascimento);
     printf("\n\n");
+
+    return p;
 }
 
-void listarNomesAlturas(NovaPessoa p[]){
+void listarNomesAlturas(NovaPessoa p[], int n){
+    for (int i = 0; i < n; i++)
+    {
+        printf("Nome: %s, altura %f\n", p[i].nome, p[i].altura);
+        printf("\n");
+    }
+    printf("\n\n");
+}
 
+void listarPessoasAno(NovaPessoa p[], int n){
+    for (int i = 0; i < n; i++)
+    {
+        //se nascer depois de um certpo ano
+        if(p[i].ano >= 2000){
+            printf("Nome: %s, GERACAO NUTELLA\n", p[i].nome);
+            printf("\n");
+        }
+    }
+    
 }
 
 int main(){
 
     int opcao;
-    NovaPessoa novapessoa;
+    int n = 0;
+    NovaPessoa novapessoa[50];
 
     //menu de opções
     do
@@ -43,9 +64,14 @@ int main(){
         switch (opcao)
         {
         case 1:
-            inserirPessoa(novapessoa);
+            novapessoa[n] = inserirPessoa();
+            n++;
             break;
+        case 2:
+            listarNomesAlturas(novapessoa, n);
         
+        case 3:
+            listarPessoasAno(novapessoa, n);
         default:
             break;
         }
