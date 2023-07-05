@@ -8,10 +8,10 @@ Write your code in this editor and press "Run" button to compile and execute it.
 #include <stdio.h>
 
 //celsius
-double calculaCelsiusKelvin(double celsius){
+double calculaKelvin(double celsius){
     return celsius + 273.15;
 }
-double calculaCelsiusFarenheit(double celsius){
+double calculaFarenheit(double celsius){
     return (celsius * (9/5)) + 32;     
 }
 
@@ -22,8 +22,8 @@ void menuConversaoCelsis(){
     printf("Digite o valor em Celsius: ");
     scanf("%lf", &celsius);
     
-    printf("Valor em Farenheit: %.2lf\n", calculaCelsiusFarenheit(celsius));
-    printf("Valor em Kelvin: %.2lf\n", calculaCelsiusKelvin(celsius));
+    printf("Valor em Farenheit: %.2lf\n", calculaFarenheit(celsius));
+    printf("Valor em Kelvin: %.2lf\n", calculaKelvin(celsius));
     
 }
 

@@ -30,7 +30,7 @@ void lerNotas(int n){
         }
         printf("\n");
     }
-    printf("Soma das notas =  %.2f\n", soma);
+    printf("Media das notas =  %.2f\n", soma / n);
 }
 
 //função para ler qunatidade de notas

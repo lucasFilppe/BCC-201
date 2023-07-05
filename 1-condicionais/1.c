@@ -8,7 +8,7 @@ int main(){
 
     switch (letra)
     {
-    case 'a' 'A':
+    case 'a'| 'A':
         printf("Eh uma vogal\n");
         break;
     case 'e' | 'E':

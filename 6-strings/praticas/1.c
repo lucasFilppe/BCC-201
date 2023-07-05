@@ -3,57 +3,45 @@ impri70ma o ´ultimo sobrenome e nome (veja o exemplo abaixo) e a quantidade tot
 e do ´ultimo sobrenome.*/
 
 #include <stdio.h>
+#include <string.h>
 
+int main() {
+    char nome_completo[71];
+    char ultimo_sobrenome[71];
+    char nome[71];
+    int quantidade_total_letras = 0;
 
-//função que verifica o tamnho da string menos os espaços e o caractere de \n
-void totalLetrasNome(char *nome){
-  int tamanho = 0;
-  int i = 0;
-  int j = 0;
-  char espaco[70];
+    printf("Digite o nome completo: ");
+    fgets(nome_completo, sizeof(nome_completo), stdin);
+    nome_completo[strcspn(nome_completo, "\n")] = '\0'; // Remove a quebra de linha da entrada
 
-  while(nome[i] != '\0'){
-    if(nome[i] != ' ' && nome[i] != '\n'){
-      tamanho++;
-  }
-  printf("Tamanho da string digitada sem espaços e barra n: %d\n", tamanho);
-
-  //verificar tamanho do ultimo nome
-  for (int i = 0; i < tamanho; i++)
-  {
-    
-    if(nome[i] == ' '){
-      espaco[j] = nome[i];
+    // Encontra o último sobrenome
+    char *sobrenome = strrchr(nome_completo, ' ');
+    if (sobrenome != NULL) {
+        strcpy(ultimo_sobrenome, sobrenome + 1);
+        *sobrenome = '\0';
+    } else {
+        strcpy(ultimo_sobrenome, nome_completo);
+        strcpy(nome, nome_completo);
     }
-  }
-  
-}
 
+    // Encontra o nome (excluindo o último sobrenome)
+    if (sobrenome != NULL) {
+        strcpy(nome, nome_completo);
+    } else {
+        nome[0] = '\0';
+    }
 
+    // Calcula a quantidade total de letras do nome completo e do último sobrenome
+    for (int i = 0; nome_completo[i] != '\0'; i++) {
+        if (nome_completo[i] != ' ') {
+            quantidade_total_letras++;
+        }
+    }
 
-//função para verificar espaços
+    printf("Último sobrenome: %s\n", ultimo_sobrenome);
+    printf("Nome: %s\n", nome);
+    printf("Quantidade total de letras: %d\n", quantidade_total_letras);
 
-int main(){
-
-  char nome[70]; //declara um vetor de char de 70 cagitracteres
-
-  //le nome
-  printf("Digite um nome completo: ");
-  fgets(nome, 70, stdin);
-
-  //verifica tamanho da string
-  int i = 0;
-  int tamanho = 0;
-
-  while(nome[i] != '\0'){
-    tamanho++;
-    i++;
-  }
-  printf("Tamanho da string digitada: %d\n", tamanho);
-
-  totalLetrasNome(nome);
-
-  
-  
-  return 0;
+    return 0;
 }

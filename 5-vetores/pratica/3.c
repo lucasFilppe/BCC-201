@@ -2,8 +2,9 @@
 #include <stdlib.h>
 
 //função para imprimir numero de vezes de ocoorencia de numero
-void imprimiOcorrencia(int A[]; int num){
+void imprimiOcorrencia(int A[], int num){
 
+  A[10];
   int cont1 = 0;
   int cont2 = 0;
   int cont3 = 0;
@@ -17,36 +18,36 @@ void imprimiOcorrencia(int A[]; int num){
 
   for (int i = 0; i < num; i++)
   {
-    if[A[i] == 1]{
+    if(A[i] == 1){
       cont1++;
     }
-    if[A[i] == 2]{
+    if(A[i] == 2){
       cont2++;
     }
-    if[A[i] == 3]{
+    if(A[i] == 3){
       cont3++;
     }
-    if[A[i] == 4]{
+    if(A[i] == 4){
       cont4++;
     }
 
-    if[A[i] == 5]{
+    if(A[i] == 5){
       cont5++;
     }
   
-    if[A[i] == 6]{
+    if(A[i] == 6){
       cont6++;
     }
-    if[A[i] == 7]{
+    if(A[i] == 7){
       cont7++;
     }
-    if[A[i] == 8]{
+    if(A[i] == 8){
       cont8++;
     }
-    if[A[i] == 9]{
+    if(A[i] == 9){
       cont9++;
     }
-    if[A[i] == 10]{
+    if(A[i] == 10){
       cont10++;
     }
   }
