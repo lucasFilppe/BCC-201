@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#define TAM 10
 
 //função para imprimir numero de vezes de ocoorencia de numero
-void imprimiOcorrencia(int A[], int num){
+void imprimiOcorrencia(int A[TAM], int num){
 
-  A[10];
   int cont1 = 0;
   int cont2 = 0;
   int cont3 = 0;

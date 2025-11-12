@@ -35,7 +35,7 @@ void listarPessoasAno(NovaPessoa p[], int n){
     for (int i = 0; i < n; i++)
     {
         //se nascer depois de um certpo ano
-        if(p[i].ano >= 2000){
+        if(p[i].anoNascimento >= 2000){
             printf("Nome: %s, GERACAO NUTELLA\n", p[i].nome);
             printf("\n");
         }

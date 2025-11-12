@@ -9,7 +9,7 @@ Write your code in this editor and press "Run" button to compile and execute it.
 
 //funçaõ que converte um valor em Celsius para Farenheit e kelvin usando passagem por referencia
 void converteCelsius(float celsius, float *farenheit, float *kelvin){
-    *farenheit =  (celsius * (9.0/5.0));
+    *farenheit =  (celsius * (9.0/5.0)+ 32);
     *kelvin = celsius + 273.15;
 }
 

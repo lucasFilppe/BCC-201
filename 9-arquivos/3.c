@@ -10,8 +10,10 @@ int main(int argc, char **argv)
   FILE *arquivo;
 
   arquivo = fopen(argv[1], "r"); // argv[1] é o primeiro argumento
+ 
+  //se for diferente de final de arquivo
   while (!feof(arquivo)) {
-      c = fgetc(arquivo);
+      c = fgetc(arquivo);//le caractere e retorna seu numero da tabela ACIII
       if (c == ' ') 
       nEspacos++;
   }
