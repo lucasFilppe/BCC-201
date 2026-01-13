@@ -29,7 +29,7 @@ void calculaTemperatura(int v[], int n){
   
   //imprime temperatura acima e abaixo da media
   printf("Temperaturas acima da media: %d\n", diaTemperaturaAcimaDaMedia);
-  printf("Temperaturas acima da media: %d\n", diaTemperaturaAbaixoDaMedia);
+  printf("Temperaturas abaixo da media: %d\n", diaTemperaturaAbaixoDaMedia);
   
 }
 int main(){

@@ -1,219 +1,230 @@
 /* damas.c
  *
- * Programa principal que usa as funções definidas em tabuleiro.c / tabuleiro.h.
+ * Programa principal do jogo de Damas.
+ * Aqui fica o fluxo geral do jogo:
+ *  - menu inicial
+ *  - leitura de comandos do usuário
+ *  - alternância de turnos
+ *  - chamada das funções que implementam as regras
  *
- * Fluxo:
- *  - Menu inicial: novo jogo ou continuar jogo salvo
- *  - Loop: cada jogador digita jogada "C3 D4" ou comando "salvar" / "sair"
- *  - Validações básicas: formato de entrada e execução via executarJogada
+ * Toda a lógica pesada do jogo (movimentos, capturas, dama)
+ * está implementada em tabuleiro.c.
  *
  * Autor: SEU NOME
  * Matrícula: SEU NÚMERO
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include "tabuleiro.h"
+#include <stdio.h>   // printf, scanf, fgets
+#include <stdlib.h>  // funções gerais
+#include <string.h>  // strlen, strcmp, strcspn
+#include <ctype.h>   // toupper
+#include "tabuleiro.h" // funções do tabuleiro
 
-/* Função auxiliar: limpa buffer do teclado até o fim da linha.
- * Útil para garantir que fgets funcione corretamente.
- */
-static void limparEntrada()
-{
+/* ---------------------------------------------------------
+ * Função auxiliar para limpar o buffer do teclado.
+ *
+ * Problema comum em C:
+ * - scanf deixa o '\n' no buffer
+ * - o próximo fgets pode ler apenas esse '\n'
+ *
+ * Esta função descarta tudo até o final da linha.
+ * --------------------------------------------------------- */
+static void limparEntrada() {
     int c;
-    while ((c = getchar()) != '\n' && c != EOF)
-        ;
+    while ((c = getchar()) != '\n' && c != EOF);
 }
 
-/* Função auxiliar: normaliza entrada da casa (aceita minúsculas,
- * e garante que string tenha pelo menos 2 caracteres).
- * Retorna 1 se a string parece válida no formato "A1".."H8", 0 caso contrário.
- */
-static int validarCasa(const char *s)
-{
-    if (!s)
-        return 0;
-    if (strlen(s) < 2)
-        return 0;
-    char letra = toupper((unsigned char)s[0]);
-    char num = s[1];
-    if (letra < 'A' || letra > 'H')
-        return 0;
-    if (num < '1' || num > '8')
-        return 0;
-    return 1;
+/* ---------------------------------------------------------
+ * Verifica se uma casa digitada pelo usuário é válida.
+ * Formato esperado: "A1" até "H8".
+ *
+ * Retorna:
+ *  1 -> formato válido
+ *  0 -> formato inválido
+ * --------------------------------------------------------- */
+static int validarCasa(const char *s) {
+    // string vazia ou muito curta é inválida
+    if (!s || strlen(s) < 2) return 0;
+
+    // letra da linha (A..H)
+    char l = toupper((unsigned char)s[0]);
+    // número da coluna (1..8)
+    char n = s[1];
+
+    // verifica se está dentro do intervalo permitido
+    return (l >= 'A' && l <= 'H' && n >= '1' && n <= '8');
 }
 
-int main()
-{
-    char opcao[10];
-    char nome1[50] = "Jogador1";
-    char nome2[50] = "Jogador2";
-    char arquivo[100];
-    char jogadorAtual = 'o'; // 'o' começa
+/* ---------------------------------------------------------
+ * Função principal do programa.
+ * --------------------------------------------------------- */
+int main() {
+
+    // matriz 8x8 que representa o tabuleiro
     char tab[8][8];
 
-    // layout inicial do jogo
+    // nomes dos jogadores
+    char nome1[50], nome2[50];
+
+    // nome do arquivo para salvar/carregar jogo
+    char arquivo[100];
+
+    // jogadorAtual:
+    // 'o' -> jogador das peças brancas
+    // 'x' -> jogador das peças pretas
+    char jogadorAtual = 'o';
+
+    // opção do menu inicial
+    char opcao[10];
+
+    /* ---------------- MENU INICIAL ---------------- */
+
     printf("=====================================\n");
     printf("      BEM-VINDO AO JOGO DE DAMAS\n");
-    printf("=====================================\n\n");
+    printf("=====================================\n");
     printf("1 - Novo jogo\n");
     printf("2 - Continuar jogo\n");
     printf("Escolha: ");
 
-    if (scanf("%9s", opcao) != 1)
-        return 0;
-
+    // lê a opção escolhida
+    if (scanf("%9s", opcao) != 1) return 0;
     limparEntrada();
 
-    // se opção for igua a 2, de continuidade ao jogo salvo
-    if (strcmp(opcao, "2") == 0)
-    {
+    /* ---------------- NOVO JOGO OU JOGO SALVO ---------------- */
+
+    if (strcmp(opcao, "2") == 0) {
+        // opção de carregar jogo salvo
         printf("Digite o nome do arquivo: ");
-        if (scanf("%99s", arquivo) != 1)
-            return 0; // lê nome do arquivo
+        scanf("%99s", arquivo);
         limparEntrada();
 
-        // carrega jogo salvo
+        // carrega o jogo do arquivo
         carregarJogo(arquivo, nome1, nome2, tab, &jogadorAtual);
-    }
-    else
-    {
-        // novo jogo: pede nomes e inicializa
+    } else {
+        // opção de novo jogo
         printf("Digite o nome do Jogador 1 (brancas - 'o'): ");
         fgets(nome1, sizeof(nome1), stdin);
-        nome1[strcspn(nome1, "\n")] = 0; // remove \n
+        nome1[strcspn(nome1, "\n")] = 0; // remove '\n'
 
         printf("Digite o nome do Jogador 2 (pretas - 'x'): ");
         fgets(nome2, sizeof(nome2), stdin);
         nome2[strcspn(nome2, "\n")] = 0;
 
+        // inicializa o tabuleiro no estado padrão
         inicializarTabuleiro(tab);
+
+        // jogador das brancas sempre começa
         jogadorAtual = 'o';
     }
 
-    // imprime estado inicial
+    // imprime o tabuleiro inicial
     imprimirTabuleiro(tab);
 
-    // loop principal
-    while (1)
-    {
-        char entrada[100];
-        char origem[10], destino[10];
+    /* ---------------- LOOP PRINCIPAL DO JOGO ---------------- */
 
-        // Mostra prompt com nome do jogador atual
-        // se jogadorAtual for 'o', mostra nome1, senao nome2
-        printf("%s  (%c), digite sua jogada (ex: C3 D4) ou 'salvar'/'sair': ",
-               (jogadorAtual == 'o') ? nome1 : nome2, jogadorAtual);
+    while (1) {
+        char entrada[100];   // linha digitada pelo usuário
+        char origem[10];     // casa de origem (ex: C3)
+        char destino[10];    // casa de destino (ex: D4)
 
-        // lê a linha inteira (aceita espaços)
-        if (!fgets(entrada, sizeof(entrada), stdin)) break;
-        // remove \n final, se houver
+        // mostra de quem é a vez
+        printf("%s (%c), digite sua jogada (ex: C3 D4) ou 'salvar'/'sair': ",
+               (jogadorAtual == 'o') ? nome1 : nome2,
+               jogadorAtual);
+
+        // lê a linha inteira
+        if (!fgets(entrada, sizeof(entrada), stdin))
+            break;
+
+        // remove o '\n' do final
         entrada[strcspn(entrada, "\n")] = 0;
 
-        // ignora linhas vazias
+        // ignora linha vazia
         if (strlen(entrada) == 0) continue;
 
-        // se o jogador digitou "sair"
-        if (strcmp(entrada, "sair") == 0)
-        {
+        /* ---------------- COMANDOS ESPECIAIS ---------------- */
+
+        // comando para sair do jogo
+        if (strcmp(entrada, "sair") == 0) {
             printf("Encerrando o jogo. Ate mais!\n");
             break;
         }
 
-        // se digitou "salvar" sozinho
-        if (strcmp(entrada, "salvar") == 0)
-        {
+        // comando para salvar o jogo
+        if (strcmp(entrada, "salvar") == 0) {
             printf("Digite o nome do arquivo para salvar: ");
-            if (scanf("%99s", arquivo) == 1)
-            {
-                limparEntrada();
-                salvarJogo(arquivo, nome1, nome2, tab, jogadorAtual);
-            }
-            else
-            {
-                limparEntrada();
-            }
+            scanf("%99s", arquivo);
+            limparEntrada();
+
+            salvarJogo(arquivo, nome1, nome2, tab, jogadorAtual);
             continue;
         }
 
-        // tenta extrair duas "palavras" (origem e destino) da linha
-        // sscanf retorna o número de itens lidos
-        /*#include <stdio.h>
+        /* ---------------- LEITURA DA JOGADA ---------------- */
 
-        int main() {
-        char *s = "10 50";
-        int idade, ano;
-        sscanf(s, "%d %d", &idade, &ano); // Lê a string "10 50"
-
-        printf("Idade: %d, Ano: %d\n", idade, ano);
-        // Saída: Idade: 10, Ano: 50
-        return 0;
-        }
-        */
-        int n = sscanf(entrada, "%9s %9s", origem, destino);
-        if (n != 2)
-        {
-            printf("Entrada invalida. Use o formato: C3 D4 ou comandos salvar/sair.\n");
+        // tenta extrair duas palavras da entrada (origem e destino)
+        if (sscanf(entrada, "%9s %9s", origem, destino) != 2) {
+            printf("Entrada invalida. Use: C3 D4\n");
             continue;
         }
 
         // valida formato das casas
-        if (!validarCasa(origem) || !validarCasa(destino))
-        {
-            printf("Formato invalido. Linhas: A-H, colunas: 1-8 (ex: C3 D4).\n");
+        if (!validarCasa(origem) || !validarCasa(destino)) {
+            printf("Formato invalido. Use casas de A1 ate H8.\n");
             continue;
         }
 
-        // executa jogada chamando executarJogada (retorna 0/1/2)
+        /* ---------------- EXECUÇÃO DA JOGADA ---------------- */
+
+        // chama a função que executa a jogada
+        // retorno:
+        // 0 -> jogada inválida
+        // 1 -> movimento simples
+        // 2 -> captura finalizada
+        // 3 -> captura múltipla continua
         int res = executarJogada(tab, origem, destino, jogadorAtual);
 
-        if (res == 0)
-        {
-            printf("Jogada inválida! Tente novamente.\n");
+        if (res == 0) {
+            printf("Jogada invalida!\n");
             continue;
         }
 
-        // imprimir sempre após movimento/captura
+        // captura múltipla: mesmo jogador continua com a mesma peça
+        if (res == 3) {
+            printf("Captura realizada! Continue capturando com a MESMA peça.\n");
+            continue;
+        }
+
+        // imprime o tabuleiro após a jogada
         imprimirTabuleiro(tab);
 
-        if (res == 2)
-        {
-            // captura: jogador joga novamente
-            printf("Captura realizada! Voce joga novamente.\n");
-            // NÃO troca jogador
-        }
-        else
-        {
-            // movimento simples: troca jogador
+        // troca de jogador após movimento simples ou fim de captura
+        if (res == 1 || res == 2) {
             jogadorAtual = (jogadorAtual == 'o') ? 'x' : 'o';
         }
 
-        // verifica fim de jogo
-        if (verificarVencedor(tab))
-        {
-            // quem venceu? Se o jogador atual é 'o' e acabou agora,
-            // o vencedor é o oposto (porque trocamos após movimento simples).
-            // Para simplicidade: contamos as peças para descobrir vencedor.
+        /* ---------------- VERIFICA FIM DE JOGO ---------------- */
+
+        if (verificarVencedor(tab)) {
             int contO = 0, contX = 0;
+
+            // conta peças restantes no tabuleiro
             for (int i = 0; i < 8; i++)
-                for (int j = 0; j < 8; j++)
-                {
-                    if (tab[i][j] == 'o')
-                        contO++;
-                    if (tab[i][j] == 'x')
-                        contX++;
+                for (int j = 0; j < 8; j++) {
+                    if (tab[i][j] == 'o' || tab[i][j] == 'O') contO++;
+                    if (tab[i][j] == 'x' || tab[i][j] == 'X') contX++;
                 }
+
             printf("=====================================\n");
             printf(" FIM DE JOGO!\n");
+
             if (contO == 0)
-                printf(" Vencedor: %s\n", nome2); // pretas venceram
+                printf(" Vencedor: %s\n", nome2);
             else if (contX == 0)
-                printf(" Vencedor: %s\n", nome1); // brancas venceram
+                printf(" Vencedor: %s\n", nome1);
             else
-                printf(" Vencedor calculado: %s (caso especial)\n", (jogadorAtual == 'o') ? nome2 : nome1);
+                printf(" Jogo encerrado.\n");
+
             printf("=====================================\n");
             break;
         }
@@ -221,3 +232,4 @@ int main()
 
     return 0;
 }
+

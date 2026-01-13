@@ -139,56 +139,77 @@ int verificarCapturaSimples(char t[8][8], int li, int ci, int lf, int cf, char j
  * usando letraParaIndice para manter consistência com a impressão.
  * --------------------------------------------------------- */
 int executarJogada(char t[8][8], char origem[3], char destino[3], char jogador) {
-    // converte letra -> índice (com a orientação usada na impressão)
     int li = letraParaIndice(origem[0]);
-    int ci = origem[1] - '1';   // coluna 1..8 -> índice 0..7
+    int ci = origem[1] - '1';
     int lf = letraParaIndice(destino[0]);
     int cf = destino[1] - '1';
 
-    // valida limites (qualquer coordenada inválida = jogada inválida)
-    if (li < 0 || li > 7 || ci < 0 || ci > 7 || lf < 0 || lf > 7 || cf < 0 || cf > 7)
+    if (li < 0 || ci < 0 || lf < 0 || cf < 0 ||
+        li > 7 || ci > 7 || lf > 7 || cf > 7)
         return 0;
 
-    // verifica se origem tem peça do jogador e destino está livre
-    if (t[li][ci] != jogador || t[lf][cf] != '-')
-        return 0;
+    char peca = t[li][ci];
+    if (jogador == 'o' && peca != 'o' && peca != 'O') return 0;
+    if (jogador == 'x' && peca != 'x' && peca != 'X') return 0;
+    if (t[lf][cf] != '-') return 0;
 
-    // posição da possível peça capturada (será preenchida pela função)
     int l_cap, c_cap;
 
-    // tenta captura primeiro (obrigatório por regra; aqui simples: só uma captura)
-    if (verificarCapturaSimples(t, li, ci, lf, cf, jogador, &l_cap, &c_cap)) {
-        // executa a captura: move peça, limpa origem e peça capturada
-        t[lf][cf] = jogador;
+    // CAPTURA DAMA
+    if ((peca == 'O' || peca == 'X') &&
+        verificarCapturaDama(t, li, ci, lf, cf, jogador, &l_cap, &c_cap)) {
+        t[lf][cf] = peca;
         t[li][ci] = '-';
         t[l_cap][c_cap] = '-';
-        printf("Peca capturada na casa %c%d!\n", 'H' - l_cap, c_cap + 1);
-        return 2; // captura
+
+        if (podeCapturarNovamente(t, lf, cf, jogador)) return 3;
+        verificarPromocao(t, lf, cf);
+        return 2;
     }
 
-    // movimento simples: diagonal 1x1
-    int di = lf - li;
-    int dj = cf - ci;
+    // CAPTURA SIMPLES
+    if (verificarCapturaSimples(t, li, ci, lf, cf, jogador, &l_cap, &c_cap)) {
+        t[lf][cf] = peca;
+        t[li][ci] = '-';
+        t[l_cap][c_cap] = '-';
+
+        if (podeCapturarNovamente(t, lf, cf, jogador)) return 3;
+        verificarPromocao(t, lf, cf);
+        return 2;
+    }
+
+    // MOVIMENTO DAMA
+    if (peca == 'O' || peca == 'X') {
+        int di = lf - li, dj = cf - ci;
+        if (abs(di) == abs(dj)) {
+            int pi = (di > 0) ? 1 : -1;
+            int pj = (dj > 0) ? 1 : -1;
+            int i = li + pi, j = ci + pj;
+            while (i != lf && j != cf) {
+                if (t[i][j] != '-') return 0;
+                i += pi; j += pj;
+            }
+            t[lf][cf] = peca;
+            t[li][ci] = '-';
+            verificarPromocao(t, lf, cf);
+            return 1;
+        }
+    }
+
+    // MOVIMENTO PEDRA
+    int di = lf - li, dj = cf - ci;
     if (abs(di) == 1 && abs(dj) == 1) {
-        // Importante: com letraParaIndice, índices menores estão no topo (H).
-        // Portanto, brancas ('o') que estão em baixo (linhas maiores) devem
-        // avançar "para cima" nos índices: di == -1.
-        // Pretas ('x') que estão no topo avançam "para baixo": di == +1.
-        if (jogador == 'o' && di == -1) {
-            t[lf][cf] = jogador;
+        if ((peca == 'o' && di == -1) || (peca == 'x' && di == 1)) {
+            t[lf][cf] = peca;
             t[li][ci] = '-';
-            return 1;
-        }
-        if (jogador == 'x' && di == 1) {
-            t[lf][cf] = jogador;
-            t[li][ci] = '-';
+            verificarPromocao(t, lf, cf);
             return 1;
         }
     }
 
-    // nenhuma regra atendida -> inválido
     return 0;
 }
+
 
 /* ---------------------------------------------------------
  * Salva o estado atual do jogo em arquivo texto.
@@ -260,3 +281,83 @@ int verificarVencedor(char t[8][8]) {
     if (o == 0 || x == 0) return 1;
     return 0;
 }
+
+void verificarPromocao(char t[8][8], int l, int c) {
+    if (t[l][c] == 'o' && l == 0) {
+        t[l][c] = 'O';
+        printf("Parabéns! Sua peça virou DAMA!\n");
+    }
+    if (t[l][c] == 'x' && l == 7) {
+        t[l][c] = 'X';
+        printf("Parabéns! Sua peça virou DAMA!\n");
+    }
+}
+
+int verificarCapturaDama(char t[8][8], int li, int ci, int lf, int cf,
+                         char jogador, int *l_cap, int *c_cap) {
+    int di = lf - li;
+    int dj = cf - ci;
+
+    if (abs(di) != abs(dj)) return 0;
+    if (t[lf][cf] != '-') return 0;
+
+    int pi = (di > 0) ? 1 : -1;
+    int pj = (dj > 0) ? 1 : -1;
+
+    int i = li + pi, j = ci + pj;
+    int encontrou = 0;
+
+    while (i != lf && j != cf) {
+        if (t[i][j] != '-') {
+            if (encontrou) return 0;
+
+            if (jogador == 'o' && (t[i][j] == 'x' || t[i][j] == 'X')) {
+                encontrou = 1;
+                *l_cap = i; *c_cap = j;
+            }
+            else if (jogador == 'x' && (t[i][j] == 'o' || t[i][j] == 'O')) {
+                encontrou = 1;
+                *l_cap = i; *c_cap = j;
+            }
+            else return 0;
+        }
+        i += pi;
+        j += pj;
+    }
+    return encontrou;
+}
+
+int podeCapturarNovamente(char t[8][8], int l, int c, char jogador) {
+    char p = t[l][c];
+
+    int dl[] = {-2, -2, 2, 2};
+    int dc[] = {-2, 2, -2, 2};
+
+    if (p == 'o' || p == 'x') {
+        for (int i = 0; i < 4; i++) {
+            int lf = l + dl[i];
+            int cf = c + dc[i];
+            int lc, cc;
+            if (lf >= 0 && lf < 8 && cf >= 0 && cf < 8)
+                if (verificarCapturaSimples(t, l, c, lf, cf, jogador, &lc, &cc))
+                    return 1;
+        }
+    }
+
+    if (p == 'O' || p == 'X') {
+        int d[] = {-1, 1};
+        for (int di = 0; di < 2; di++)
+            for (int dj = 0; dj < 2; dj++) {
+                int i = l + d[di], j = c + d[dj];
+                while (i >= 0 && i < 8 && j >= 0 && j < 8) {
+                    int lc, cc;
+                    if (verificarCapturaDama(t, l, c, i, j, jogador, &lc, &cc))
+                        return 1;
+                    i += d[di];
+                    j += d[dj];
+                }
+            }
+    }
+    return 0;
+}
+

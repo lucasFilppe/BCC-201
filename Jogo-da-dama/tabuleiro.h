@@ -55,4 +55,14 @@ void carregarJogo(const char *arquivo, char *n1, char *n2, char t[8][8], char *j
  */
 int verificarCapturaSimples(char t[8][8], int li, int ci, int lf, int cf, char jogador, int *l_cap, int *c_cap);
 
+// promoção
+void verificarPromocao(char t[8][8], int l, int c);
+
+// captura dama
+int verificarCapturaDama(char t[8][8], int li, int ci, int lf, int cf,
+                         char jogador, int *l_cap, int *c_cap);
+
+// captura múltipla
+int podeCapturarNovamente(char t[8][8], int l, int c, char jogador);
+
 #endif /* TABULEIRO_H */

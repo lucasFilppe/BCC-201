@@ -8,19 +8,24 @@ int main(){
 
     switch (letra)
     {
-    case 'a'| 'A':
+    case 'a':
+    case 'A':
         printf("Eh uma vogal\n");
         break;
-    case 'e' | 'E':
+    case 'e':
+    case 'E':
         printf("Eh uma vogal\n");
         break;
-    case 'i' | 'I':
+    case 'i' :
+    case 'I':
         printf("Eh uma vogal\n");
         break;
-    case 'o' | 'O':
+    case 'o' :
+    case 'O':
         printf("Eh uma vogal\n");
         break;
-    case 'u' | 'U':
+    case 'u' :
+    case 'U' :
         printf("Eh uma vogal\n");
         break;
     

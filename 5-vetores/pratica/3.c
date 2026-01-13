@@ -1,97 +1,47 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define TAM 10
+#include <time.h> // Necessário para usar o tempo como semente
 
-//função para imprimir numero de vezes de ocoorencia de numero
-void imprimiOcorrencia(int A[TAM], int num){
+#define TAM_VETOR 20 // Tamanho real do vetor de números
+#define MAX_VALOR 10 // Valor máximo que o número pode ter
 
-  int cont1 = 0;
-  int cont2 = 0;
-  int cont3 = 0;
-  int cont4 = 0;
-  int cont5 = 0;
-  int cont6 = 0;
-  int cont7 = 0;
-  int cont8 = 0;
-  int cont9 = 9;
-  int cont10 = 0;
+void imprimiOcorrencia(int A[], int tamanhoVetor) {
+    // Usamos um vetor de 11 posições para contar de 1 a 10
+    // O [0] será ignorado para facilitar a lógica
+    int contadores[11] = {0}; 
 
-  for (int i = 0; i < num; i++)
-  {
-    if(A[i] == 1){
-      cont1++;
-    }
-    if(A[i] == 2){
-      cont2++;
-    }
-    if(A[i] == 3){
-      cont3++;
-    }
-    if(A[i] == 4){
-      cont4++;
+    for (int i = 0; i < tamanhoVetor; i++) {
+        if (A[i] >= 1 && A[i] <= 10) {
+            contadores[A[i]]++;
+        }
     }
 
-    if(A[i] == 5){
-      cont5++;
+    for (int i = 1; i <= 10; i++) {
+        printf("Ocorrencias de %d: %d\n", i, contadores[i]);
     }
-  
-    if(A[i] == 6){
-      cont6++;
-    }
-    if(A[i] == 7){
-      cont7++;
-    }
-    if(A[i] == 8){
-      cont8++;
-    }
-    if(A[i] == 9){
-      cont9++;
-    }
-    if(A[i] == 10){
-      cont10++;
-    }
-  }
-  printf("Ocorencias de 1: %d\n", cont1);
-  printf("Ocorencias de 2: %d\n", cont2);
-  printf("Ocorencias de 3: %d\n", cont3);
-  printf("Ocorencias de 4: %d\n", cont4);
-  printf("Ocorencias de 5: %d\n", cont5);
-  printf("Ocorencias de 6: %d\n", cont6);
-  printf("Ocorencias de 7: %d\n", cont7);
-  printf("Ocorencias de 8: %d\n", cont8);
-  printf("Ocorencias de 9: %d\n", cont9);
-  printf("Ocorencias de 10: %d\n", cont10);
 }
 
-int main(){
+int main() {
+    int n;
+    srand(time(NULL)); // Inicializa o gerador de números aleatórios
 
-  int n;
+    printf("Digite o limite superior para o sorteio (ate 10): ");
+    scanf("%d", &n);
 
-  //le um numero inteiro
-  printf("Digite um numero inteiro que seja menor ou igual a 10: ");
-  scanf("%d", &n);
+    if (n >= 1 && n <= 10) {
+        int numeroAleatorio[TAM_VETOR];
 
-  int numeroAleatorio[10];//declarando vetor de numeros aleatorios
+        printf("Numeros gerados: ");
+        for (int i = 0; i < TAM_VETOR; i++) {
+            numeroAleatorio[i] = 1 + (rand() % n);
+            printf("%d ", numeroAleatorio[i]);
+        }
+        printf("\n\n");
 
-  //se numero for menor ou igaual a 500, entao:
-  if (n <= 10)
-  {
-    //enquanto i for menor que 20
-    printf("Numero gerado: ");
-    for(int i = 0; i < 20; i++){
-      
-      numeroAleatorio[i] = 1 + (rand() % n);//gera numero aleatorio de 1 a 10
-      printf("%d ", numeroAleatorio[i]);
+        imprimiOcorrencia(numeroAleatorio, TAM_VETOR);
+    } else {
+        printf("Numero invalido! Digite entre 1 e 10.\n");
     }
-     printf("\n");
-     imprimiOcorrencia(numeroAleatorio, n);
-  }
 
-  else
-  {
-    printf("Numero inavlido\n");
-  }
-  
-  
-  return 0;
+    return 0;
 }

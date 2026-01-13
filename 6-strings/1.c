@@ -16,9 +16,11 @@ int main(int argc, char *argv[]) {
     char *palavra_digitada = argv[1]; 
     
     // Compara a palavra digitada (argv[1]) com "UFOP"
-    if (strcmp(palavra_digitada, "UFOP") == 0) {
+    if (strcmp(palavra_digitada, "UFOP") == 0) 
         printf("Bem vindo a Ouro preto\n");
-    } else {
+    else if (strcmp(palavra_digitada, "ufop") == 0) 
+        printf("Bem vindo a Ouro preto\n");
+     else {
         printf("Palavra digitada: %s. Nao e 'UFOP'.\n", palavra_digitada);
     }
 

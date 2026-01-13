@@ -1,11 +1,11 @@
-Ana 
+Ana
 Maria
 - x - x - x - x 
 x - x - x - x - 
-- - - - - x - - 
-x - o - - - x - 
-- - - - - o - - 
-o - o - - - - - 
-- o - o - o - - 
+- x - - - x - x 
+- - - - x - - - 
+- - - o - - - - 
+o - o - - - o - 
+- o - o - o - o 
 o - o - o - o - 
 o
