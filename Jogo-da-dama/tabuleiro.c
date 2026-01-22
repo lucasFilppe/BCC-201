@@ -1,61 +1,36 @@
-/* tabuleiro.c
- *
- * Implementação das funções do tabuleiro para o jogo de Damas.
- *
- * Observações importantes sobre convenção usada aqui:
- * - A matriz t[8][8] é indexada como t[linha][coluna], com linhas 0..7 e colunas 0..7.
- * - A função imprimirTabuleiro mostra a linha 0 como 'H' (topo) e a linha 7 como 'A' (embaixo),
- *   por isso usamos uma função de conversão consistente letra ↔ índice.
- *
- * Autor: SEU NOME
- * Matrícula: SEU NÚMERO
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>      // para toupper()
+#include <ctype.h> // para toupper()
 #include "tabuleiro.h"
 
-/* ---------------------------------------------------------
- * Auxiliar: converte letra de linha ('A'..'H' ou 'a'..'h')
- * para índice da matriz usada no programa.
- *
- * Retorno:
- *   -1 se letra inválida
- *   0..7 índice válido na matriz, onde:
- *     0 corresponde à linha H (topo na impressão)
- *     7 corresponde à linha A (embaixo na impressão)
- *
- * Isto garante que imprimirTabuleiro e a leitura de coordenadas
- * usem a mesma orientação.
- * --------------------------------------------------------- */
-static int letraParaIndice(char L) {
+/*static: Significa que esta função só pode ser usada dentro do arquivo onde
+ foi criada. É uma boa prática de organização.
+
+toupper: Esta é a parte da "gentileza" com o usuário. Se ele digitar 'a' (minúsculo)
+ a função transforma em 'A' (maiúsculo). Isso evita que o programa dê erro
+ só por causa da tecla Caps Lock*/
+static int letraParaIndice(char L)
+{
     L = toupper((unsigned char)L);
-    if (L < 'A' || L > 'H') return -1;
+
+    // se a letra for diferente de A ate H, retorne -1 para indicar erro
+    if (L < 'A' || L > 'H')
+        return -1;
+
+    // Subtrai o valor ASCII da letra L do valor ASCII de 'H'.
+    // Como 'H' é 72 e 'A' é 65, o resultado será um índice de 0 a 7.
+    // Exemplo: Se L for 'H' (72), 72 - 72 = 0. Se L for 'A' (65), 72 - 65 = 7.
     return 'H' - L; // 'H'->0, 'G'->1, ..., 'A'->7
 }
 
-/* ---------------------------------------------------------
- * Inicializa o tabuleiro no estado padrão do enunciado.
- *
- * Layout esperado visualmente (linha H no topo):
- *
- * H x - x - x - x -
- * G - x - x - x - x
- * F x - x - x - x -
- * E - - - - - - - -
- * D - - - - - - - -
- * C o - o - o - o -
- * B - o - o - o - o
- * A o - o - o - o -
- *
- * Observação sobre paridade:
- * - Para as linhas 0..2 (H,G,F) colocamos 'x' quando (i+j)%2==0
- * - Para as linhas 5..7 (C,B,A) colocamos 'o' quando (i+j)%2==1
- * Isso produz a disposição correta das casas escuras conforme o enunciado.
- * --------------------------------------------------------- */
-void inicializarTabuleiro(char tabuleiro[8][8]) {
+/* as peças pretas são icializadas nas tres primeiras linha do tabuleiro(x)
+   as peças brancas são inicializadas nas 3 ultimas linhas (0)
+   para posiciona-las na celula correta, verificamos se a soma
+    da linha e coluna é impar
+*/
+void inicializarTabuleiro(char tabuleiro[8][8])
+{
     // Preenche todas as casas com '-'
     for (int i = 0; i < 8; i++)
         for (int j = 0; j < 8; j++)
@@ -63,33 +38,40 @@ void inicializarTabuleiro(char tabuleiro[8][8]) {
 
     // Coloca as peças PRETAS ('x') nas 3 primeiras linhas (topo)
     // Usamos a mesma paridade para as duas cores: (i + j) % 2 == 1
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 8; j++) {
-            if ((i + j) % 2 == 1) {
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if ((i + j) % 2 == 1)
+            {
                 tabuleiro[i][j] = 'x';
             }
         }
-    }
 
-    // Coloca as peças BRANCAS ('o') nas 3 últimas linhas (fundo)
-    for (int i = 5; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            if ((i + j) % 2 == 1) {
-                tabuleiro[i][j] = 'o';
+        // Coloca as peças BRANCAS ('o') nas 3 últimas linhas (fundo)
+        for (int i = 5; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if ((i + j) % 2 == 1)
+                {
+                    tabuleiro[i][j] = 'o';
+                }
             }
         }
     }
 }
-
 
 /* ---------------------------------------------------------
  * Imprime o tabuleiro em formato legível:
  * - colunas 1..8 no topo e rodapé
  * - linhas H..A nas laterais (H no topo)
  * --------------------------------------------------------- */
-void imprimirTabuleiro(char t[8][8]) {
+void imprimirTabuleiro(char t[8][8])
+{
     printf("  1 2 3 4 5 6 7 8\n");
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++)
+    {
         // 'H' - i transforma i=0 -> 'H', i=7 -> 'A'
         printf("%c ", 'H' - i);
         for (int j = 0; j < 8; j++)
@@ -99,115 +81,267 @@ void imprimirTabuleiro(char t[8][8]) {
     printf("  1 2 3 4 5 6 7 8\n\n");
 }
 
-/* ---------------------------------------------------------
- * Verifica se um salto de 2x2 (diagonal) é uma captura válida.
- * - li,ci = origem (índices de matriz)
- * - lf,cf = destino (índices de matriz)
- * - jogador = 'o' ou 'x'
- * Se for captura válida retorna 1 e coloca em *l_cap,*c_cap a
- * posição da peça capturada.
- * --------------------------------------------------------- */
-int verificarCapturaSimples(char t[8][8], int li, int ci, int lf, int cf, char jogador, int *l_cap, int *c_cap) {
+/*“A função recebe a posição inicial e final de uma jogada.
+Ela calcula o deslocamento do movimento, verifica se é um salto diagonal
+de duas casas, confere se o destino está vazio e identifica a casa
+intermediária do salto, onde deve existir uma peça adversária.
+Se todas essas condições forem atendidas, a captura é considerada válida.”*/
+int verificarCapturaSimples(char tabuleiro[8][8],
+                            int linhaOrigem, int colunaOrigem,
+                            int linhaDestino, int colunaDestino,
+                            char jogador,
+                            int *linhaCapturada, int *colunaCapturada)
+{
+    /*Peça 'x' está em (3, 4)
+        Peça 'o' está em (4, 5)
+        Destino da captura seria (5, 6)
+    */
+    int deslocLinha = linhaDestino - linhaOrigem;    // 6 - 3 = 2
+    int deslocColuna = colunaDestino - colunaOrigem; // 6 - 4 = 2
+
+    // Deve ser um salto diagonal de duas casas
+    if (abs(deslocLinha) != 2 || abs(deslocColuna) != 2)
+        return 0;
+
+    // A casa de destino deve estar vazia
+    if (tabuleiro[linhaDestino][colunaDestino] != '-')
+        return 0;
+
+    // Posição da peça capturada (meio do salto)
+    *linhaCapturada = linhaOrigem + deslocLinha / 2;    // 3 + 2/2 = 4
+    *colunaCapturada = colunaOrigem + deslocColuna / 2; // 4 + (2)/2 = 5
+
+    // Define qual é a peça do adversário
+    char pecaAdversaria;
+
+    if (jogador == 'x')
+    {
+        pecaAdversaria = 'o';
+    }
+    else
+    {
+        pecaAdversaria = 'x';
+    }
+
+    // Verifica se existe uma peça adversária na casa do meio
+    //Em (4, 5) temos 'o'
+    return tabuleiro[*linhaCapturada][*colunaCapturada] == pecaAdversaria;
+}
+
+int verificarCapturaDama(char t[8][8], int li, int ci, int lf, int cf,
+                         char jogador, int *l_cap, int *c_cap)
+{
     int di = lf - li;
     int dj = cf - ci;
 
-    // Captura deve ser salto diagonal de 2 casas (±2, ±2)
-    if (abs(di) != 2 || abs(dj) != 2) return 0;
-
-    // Destino deve estar vazio
-    if (t[lf][cf] != '-') return 0;
-
-    // Posição do meio (peça a ser capturada)
-    *l_cap = li + di / 2;
-    *c_cap = ci + dj / 2;
-
-    // Deve existir uma peça do adversário nessa casa do meio
-    char meio = t[*l_cap][*c_cap];
-    if (jogador == 'o' && meio == 'x') return 1;
-    if (jogador == 'x' && meio == 'o') return 1;
-
-    return 0;
-}
-
-/* ---------------------------------------------------------
- * Executa uma jogada: tentativa de captura primeiro, se não,
- * tentativa de movimento simples. Retorna 0/1/2 conforme descrito.
- *
- * Observação: as coordenadas de origem/destino chegam como strings
- * tipo "C3". A função aqui espera índices já convertidos como li,ci,lf,cf.
- * Porém o main passa strings ("C3"), e nesta função fazemos a conversão
- * usando letraParaIndice para manter consistência com a impressão.
- * --------------------------------------------------------- */
-int executarJogada(char t[8][8], char origem[3], char destino[3], char jogador) {
-    int li = letraParaIndice(origem[0]);
-    int ci = origem[1] - '1';
-    int lf = letraParaIndice(destino[0]);
-    int cf = destino[1] - '1';
-
-    if (li < 0 || ci < 0 || lf < 0 || cf < 0 ||
-        li > 7 || ci > 7 || lf > 7 || cf > 7)
+    if (abs(di) != abs(dj))
+        return 0;
+    if (t[lf][cf] != '-')
         return 0;
 
-    char peca = t[li][ci];
-    if (jogador == 'o' && peca != 'o' && peca != 'O') return 0;
-    if (jogador == 'x' && peca != 'x' && peca != 'X') return 0;
-    if (t[lf][cf] != '-') return 0;
+    int pi = (di > 0) ? 1 : -1;
+    int pj = (dj > 0) ? 1 : -1;
 
-    int l_cap, c_cap;
+    int i = li + pi, j = ci + pj;
+    int encontrou = 0;
 
-    // CAPTURA DAMA
-    if ((peca == 'O' || peca == 'X') &&
-        verificarCapturaDama(t, li, ci, lf, cf, jogador, &l_cap, &c_cap)) {
-        t[lf][cf] = peca;
-        t[li][ci] = '-';
-        t[l_cap][c_cap] = '-';
+    while (i != lf && j != cf)
+    {
+        if (t[i][j] != '-')
+        {
+            if (encontrou)
+                return 0;
 
-        if (podeCapturarNovamente(t, lf, cf, jogador)) return 3;
-        verificarPromocao(t, lf, cf);
-        return 2;
-    }
-
-    // CAPTURA SIMPLES
-    if (verificarCapturaSimples(t, li, ci, lf, cf, jogador, &l_cap, &c_cap)) {
-        t[lf][cf] = peca;
-        t[li][ci] = '-';
-        t[l_cap][c_cap] = '-';
-
-        if (podeCapturarNovamente(t, lf, cf, jogador)) return 3;
-        verificarPromocao(t, lf, cf);
-        return 2;
-    }
-
-    // MOVIMENTO DAMA
-    if (peca == 'O' || peca == 'X') {
-        int di = lf - li, dj = cf - ci;
-        if (abs(di) == abs(dj)) {
-            int pi = (di > 0) ? 1 : -1;
-            int pj = (dj > 0) ? 1 : -1;
-            int i = li + pi, j = ci + pj;
-            while (i != lf && j != cf) {
-                if (t[i][j] != '-') return 0;
-                i += pi; j += pj;
+            if (jogador == 'o' && (t[i][j] == 'x' || t[i][j] == 'X'))
+            {
+                encontrou = 1;
+                *l_cap = i;
+                *c_cap = j;
             }
-            t[lf][cf] = peca;
-            t[li][ci] = '-';
-            verificarPromocao(t, lf, cf);
+            else if (jogador == 'x' && (t[i][j] == 'o' || t[i][j] == 'O'))
+            {
+                encontrou = 1;
+                *l_cap = i;
+                *c_cap = j;
+            }
+            else
+                return 0;
+        }
+        i += pi;
+        j += pj;
+    }
+    return encontrou;
+}
+
+/*
+ * Função: verificarCapturaSimples
+ *
+ * Verifica se um movimento no jogo de Damas Brasileira é uma captura simples válida.
+ *
+ * A função confere se:
+ * 1) O movimento é diagonal e avança exatamente duas casas.
+ * 2) A casa de destino está vazia.
+ * 3) Existe uma peça adversária exatamente entre a origem e o destino.
+ *
+ * Caso a captura seja válida, a função retorna 1 (verdadeiro) e informa,
+ * por meio dos ponteiros, a posição (linha e coluna) da peça capturada.
+ *
+ * Caso contrário, retorna 0 (falso).
+ *
+ * Parâmetros:
+ * - tabuleiro: matriz 8x8 que representa o estado atual do jogo.
+ * - linhaOrigem, colunaOrigem: posição inicial da peça do jogador.
+ * - linhaDestino, colunaDestino: posição final desejada após o movimento.
+ * - jogador: caractere que representa o jogador atual ('x' ou 'o').
+ * - linhaCapturada, colunaCapturada: ponteiros que armazenam a posição
+ *   da peça adversária capturada, caso a jogada seja válida.
+ */
+int executarJogada(char tabuleiro[8][8],
+                   char posicaoOrigem[3],
+                   char posicaoDestino[3],
+                   char jogadorAtual)
+{
+    // Converte as posições do tipo "D4" para índices da matriz
+    int linhaOrigem  = letraParaIndice(posicaoOrigem[0]);
+    int colunaOrigem = posicaoOrigem[1] - '1';
+
+    int linhaDestino  = letraParaIndice(posicaoDestino[0]);
+    int colunaDestino = posicaoDestino[1] - '1';
+
+    // Verifica se as posições estão dentro do tabuleiro
+    if (linhaOrigem < 0 || colunaOrigem < 0 ||
+        linhaDestino < 0 || colunaDestino < 0 ||
+        linhaOrigem > 7 || colunaOrigem > 7 ||
+        linhaDestino > 7 || colunaDestino > 7)
+        return 0;
+
+    // Obtém a peça da posição de origem
+    char pecaSelecionada = tabuleiro[linhaOrigem][colunaOrigem];
+
+    // Verifica se a peça pertence ao jogador atual
+    if (jogadorAtual == 'o' &&
+        pecaSelecionada != 'o' && pecaSelecionada != 'O')
+        return 0;
+
+    if (jogadorAtual == 'x' &&
+        pecaSelecionada != 'x' && pecaSelecionada != 'X')
+        return 0;
+
+    // A casa de destino precisa estar vazia
+    if (tabuleiro[linhaDestino][colunaDestino] != '-')
+        return 0;
+
+    // Guarda a posição da peça capturada
+    int linhaPecaCapturada, colunaPecaCapturada;
+
+    /* =====================================================
+       CAPTURA COM DAMA
+       ===================================================== */
+    if ((pecaSelecionada == 'O' || pecaSelecionada == 'X') &&
+        verificarCapturaDama(tabuleiro,
+                              linhaOrigem, colunaOrigem,
+                              linhaDestino, colunaDestino,
+                              jogadorAtual,
+                              &linhaPecaCapturada,
+                              &colunaPecaCapturada))
+    {
+        tabuleiro[linhaDestino][colunaDestino] = pecaSelecionada;
+        tabuleiro[linhaOrigem][colunaOrigem]   = '-';
+        tabuleiro[linhaPecaCapturada][colunaPecaCapturada] = '-';
+
+        if (podeCapturarNovamente(tabuleiro,
+                                  linhaDestino,
+                                  colunaDestino,
+                                  jogadorAtual))
+            return 3; // captura múltipla obrigatória
+
+        verificarPromocao(tabuleiro, linhaDestino, colunaDestino);
+        return 2; // captura simples
+    }
+
+    /* =====================================================
+       CAPTURA COM PEÇA COMUM
+       ===================================================== */
+    if (verificarCapturaSimples(tabuleiro,
+                                linhaOrigem, colunaOrigem,
+                                linhaDestino, colunaDestino,
+                                jogadorAtual,
+                                &linhaPecaCapturada,
+                                &colunaPecaCapturada))
+    {
+        tabuleiro[linhaDestino][colunaDestino] = pecaSelecionada;
+        tabuleiro[linhaOrigem][colunaOrigem]   = '-';
+        tabuleiro[linhaPecaCapturada][colunaPecaCapturada] = '-';
+
+        if (podeCapturarNovamente(tabuleiro,
+                                  linhaDestino,
+                                  colunaDestino,
+                                  jogadorAtual))
+            return 3;
+
+        verificarPromocao(tabuleiro, linhaDestino, colunaDestino);
+        return 2;
+    }
+
+    /* =====================================================
+       MOVIMENTO SIMPLES DE DAMA
+       ===================================================== */
+    if (pecaSelecionada == 'O' || pecaSelecionada == 'X')
+    {
+        int deslocamentoLinha  = linhaDestino - linhaOrigem;
+        int deslocamentoColuna = colunaDestino - colunaOrigem;
+
+        if (abs(deslocamentoLinha) == abs(deslocamentoColuna))
+        {
+            int passoLinha  = (deslocamentoLinha > 0) ? 1 : -1;
+            int passoColuna = (deslocamentoColuna > 0) ? 1 : -1;
+
+            int linhaAtual  = linhaOrigem  + passoLinha;
+            int colunaAtual = colunaOrigem + passoColuna;
+
+            while (linhaAtual != linhaDestino &&
+                   colunaAtual != colunaDestino)
+            {
+                if (tabuleiro[linhaAtual][colunaAtual] != '-')
+                    return 0;
+
+                linhaAtual  += passoLinha;
+                colunaAtual += passoColuna;
+            }
+
+            tabuleiro[linhaDestino][colunaDestino] = pecaSelecionada;
+            tabuleiro[linhaOrigem][colunaOrigem]   = '-';
+
+            verificarPromocao(tabuleiro,
+                              linhaDestino,
+                              colunaDestino);
             return 1;
         }
     }
 
-    // MOVIMENTO PEDRA
-    int di = lf - li, dj = cf - ci;
-    if (abs(di) == 1 && abs(dj) == 1) {
-        if ((peca == 'o' && di == -1) || (peca == 'x' && di == 1)) {
-            t[lf][cf] = peca;
-            t[li][ci] = '-';
-            verificarPromocao(t, lf, cf);
+    /* =====================================================
+       MOVIMENTO SIMPLES DE PEÇA COMUM
+       ===================================================== */
+    int deslocamentoLinha  = linhaDestino - linhaOrigem;
+    int deslocamentoColuna = colunaDestino - colunaOrigem;
+
+    if (abs(deslocamentoLinha) == 1 &&
+        abs(deslocamentoColuna) == 1)
+    {
+        if ((pecaSelecionada == 'o' && deslocamentoLinha == -1) ||
+            (pecaSelecionada == 'x' && deslocamentoLinha == 1))
+        {
+            tabuleiro[linhaDestino][colunaDestino] = pecaSelecionada;
+            tabuleiro[linhaOrigem][colunaOrigem]   = '-';
+
+            verificarPromocao(tabuleiro,
+                              linhaDestino,
+                              colunaDestino);
             return 1;
         }
     }
 
-    return 0;
+    return 0; // jogada inválida
 }
 
 
@@ -219,9 +353,11 @@ int executarJogada(char t[8][8], char origem[3], char destino[3], char jogador) 
  * linhas 3..10: 8 linhas do tabuleiro (cada célula seguida por espaço)
  * última linha: jogador atual (caractere 'o' ou 'x')
  * --------------------------------------------------------- */
-void salvarJogo(const char *arquivo, const char *n1, const char *n2, char t[8][8], char jogador) {
+void salvarJogo(const char *arquivo, const char *n1, const char *n2, char t[8][8], char jogador)
+{
     FILE *f = fopen(arquivo, "w");
-    if (!f) {
+    if (!f)
+    {
         printf("Erro ao abrir arquivo para salvar.\n");
         return;
     }
@@ -229,7 +365,8 @@ void salvarJogo(const char *arquivo, const char *n1, const char *n2, char t[8][8
     fprintf(f, "%s\n", n1);
     fprintf(f, "%s\n", n2);
 
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++)
+    {
         for (int j = 0; j < 8; j++)
             fprintf(f, "%c ", t[i][j]);
         fprintf(f, "\n");
@@ -245,96 +382,77 @@ void salvarJogo(const char *arquivo, const char *n1, const char *n2, char t[8][8
  * Carrega jogo de arquivo no mesmo formato usado por salvarJogo.
  * Em caso de erro (arquivo não encontrado) finaliza o programa com exit(1).
  * --------------------------------------------------------- */
-void carregarJogo(const char *arquivo, char *n1, char *n2, char t[8][8], char *jogador) {
+void carregarJogo(const char *arquivo, char *n1, char *n2, char t[8][8], char *jogador)
+{
     FILE *f = fopen(arquivo, "r");
-    if (!f) {
+    if (!f)
+    {
         printf("Erro ao abrir o arquivo %s para leitura.\n", arquivo);
         exit(1);
     }
 
     // lê nomes (assumimos no máximo 49 chars)
-    fgets(n1, 50, f); n1[strcspn(n1, "\n")] = 0;
-    fgets(n2, 50, f); n2[strcspn(n2, "\n")] = 0;
+    fgets(n1, 50, f);
+    n1[strcspn(n1, "\n")] = 0;
+    fgets(n2, 50, f);
+    n2[strcspn(n2, "\n")] = 0;
 
     // lê o tabuleiro (8x8)
     for (int i = 0; i < 8; i++)
         for (int j = 0; j < 8; j++)
-            fscanf(f, " %c", &t[i][j]);//le cada caractere do tabuleiro
+            fscanf(f, " %c", &t[i][j]); // le cada caractere do tabuleiro
 
     // lê jogador atual 'x' ou'o'
     fscanf(f, " %c", jogador);
 
-    fclose(f);//fecha o arquivo
+    fclose(f); // fecha o arquivo
 }
 
 /* ---------------------------------------------------------
  * Verifica se algum jogador ficou sem peças => fim de jogo.
  * Retorna 1 se o jogo acabou (um jogador sem peças), 0 caso contrário.
  * --------------------------------------------------------- */
-int verificarVencedor(char t[8][8]) {
+int verificarVencedor(char t[8][8])
+{
     int o = 0, x = 0;
     for (int i = 0; i < 8; i++)
-        for (int j = 0; j < 8; j++) {
-            if (t[i][j] == 'o') o++;
-            if (t[i][j] == 'x') x++;
+        for (int j = 0; j < 8; j++)
+        {
+            if (t[i][j] == 'o')
+                o++;
+            if (t[i][j] == 'x')
+                x++;
         }
-    if (o == 0 || x == 0) return 1;
+    if (o == 0 || x == 0)
+        return 1;
     return 0;
 }
 
-void verificarPromocao(char t[8][8], int l, int c) {
-    if (t[l][c] == 'o' && l == 0) {
+void verificarPromocao(char t[8][8], int l, int c)
+{
+    if (t[l][c] == 'o' && l == 0)
+    {
         t[l][c] = 'O';
         printf("Parabéns! Sua peça virou DAMA!\n");
     }
-    if (t[l][c] == 'x' && l == 7) {
+    if (t[l][c] == 'x' && l == 7)
+    {
         t[l][c] = 'X';
         printf("Parabéns! Sua peça virou DAMA!\n");
     }
 }
 
-int verificarCapturaDama(char t[8][8], int li, int ci, int lf, int cf,
-                         char jogador, int *l_cap, int *c_cap) {
-    int di = lf - li;
-    int dj = cf - ci;
-
-    if (abs(di) != abs(dj)) return 0;
-    if (t[lf][cf] != '-') return 0;
-
-    int pi = (di > 0) ? 1 : -1;
-    int pj = (dj > 0) ? 1 : -1;
-
-    int i = li + pi, j = ci + pj;
-    int encontrou = 0;
-
-    while (i != lf && j != cf) {
-        if (t[i][j] != '-') {
-            if (encontrou) return 0;
-
-            if (jogador == 'o' && (t[i][j] == 'x' || t[i][j] == 'X')) {
-                encontrou = 1;
-                *l_cap = i; *c_cap = j;
-            }
-            else if (jogador == 'x' && (t[i][j] == 'o' || t[i][j] == 'O')) {
-                encontrou = 1;
-                *l_cap = i; *c_cap = j;
-            }
-            else return 0;
-        }
-        i += pi;
-        j += pj;
-    }
-    return encontrou;
-}
-
-int podeCapturarNovamente(char t[8][8], int l, int c, char jogador) {
+int podeCapturarNovamente(char t[8][8], int l, int c, char jogador)
+{
     char p = t[l][c];
 
     int dl[] = {-2, -2, 2, 2};
     int dc[] = {-2, 2, -2, 2};
 
-    if (p == 'o' || p == 'x') {
-        for (int i = 0; i < 4; i++) {
+    if (p == 'o' || p == 'x')
+    {
+        for (int i = 0; i < 4; i++)
+        {
             int lf = l + dl[i];
             int cf = c + dc[i];
             int lc, cc;
@@ -344,12 +462,15 @@ int podeCapturarNovamente(char t[8][8], int l, int c, char jogador) {
         }
     }
 
-    if (p == 'O' || p == 'X') {
+    if (p == 'O' || p == 'X')
+    {
         int d[] = {-1, 1};
         for (int di = 0; di < 2; di++)
-            for (int dj = 0; dj < 2; dj++) {
+            for (int dj = 0; dj < 2; dj++)
+            {
                 int i = l + d[di], j = c + d[dj];
-                while (i >= 0 && i < 8 && j >= 0 && j < 8) {
+                while (i >= 0 && i < 8 && j >= 0 && j < 8)
+                {
                     int lc, cc;
                     if (verificarCapturaDama(t, l, c, i, j, jogador, &lc, &cc))
                         return 1;
@@ -360,4 +481,3 @@ int podeCapturarNovamente(char t[8][8], int l, int c, char jogador) {
     }
     return 0;
 }
-

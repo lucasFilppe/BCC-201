@@ -1,8 +1,8 @@
 #include <stdio.h>
 
 int main(){
-  int inteiro = 10;
-  char palavra[10] = "Palavra";
+  int inteiro = 26;
+  char palavra[10] = "idade";
 
   // declaração e carregamento do arquivo
   FILE *arquivo = fopen("file.txt", "w");

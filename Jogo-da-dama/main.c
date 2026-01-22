@@ -14,10 +14,10 @@
  * Matrícula: SEU NÚMERO
  */
 
-#include <stdio.h>   // printf, scanf, fgets
-#include <stdlib.h>  // funções gerais
-#include <string.h>  // strlen, strcmp, strcspn
-#include <ctype.h>   // toupper
+#include <stdio.h>     // printf, scanf, fgets
+#include <stdlib.h>    // funções gerais
+#include <string.h>    // strlen, strcmp, strcspn
+#include <ctype.h>     // toupper
 #include "tabuleiro.h" // funções do tabuleiro
 
 /* ---------------------------------------------------------
@@ -29,9 +29,11 @@
  *
  * Esta função descarta tudo até o final da linha.
  * --------------------------------------------------------- */
-static void limparEntrada() {
+static void limparEntrada()
+{
     int c;
-    while ((c = getchar()) != '\n' && c != EOF);
+    while ((c = getchar()) != '\n' && c != EOF)
+        ;
 }
 
 /* ---------------------------------------------------------
@@ -42,9 +44,11 @@ static void limparEntrada() {
  *  1 -> formato válido
  *  0 -> formato inválido
  * --------------------------------------------------------- */
-static int validarCasa(const char *s) {
+static int validarCasa(const char *s)
+{
     // string vazia ou muito curta é inválida
-    if (!s || strlen(s) < 2) return 0;
+    if (!s || strlen(s) < 2)
+        return 0;
 
     // letra da linha (A..H)
     char l = toupper((unsigned char)s[0]);
@@ -58,7 +62,8 @@ static int validarCasa(const char *s) {
 /* ---------------------------------------------------------
  * Função principal do programa.
  * --------------------------------------------------------- */
-int main() {
+int main()
+{
 
     // matriz 8x8 que representa o tabuleiro
     char tab[8][8];
@@ -72,7 +77,7 @@ int main() {
     // jogadorAtual:
     // 'o' -> jogador das peças brancas
     // 'x' -> jogador das peças pretas
-    char jogadorAtual = 'o';
+    char jogadorAtual;
 
     // opção do menu inicial
     char opcao[10];
@@ -87,20 +92,14 @@ int main() {
     printf("Escolha: ");
 
     // lê a opção escolhida
-    if (scanf("%9s", opcao) != 1) return 0;
+    if (scanf("%9s", opcao) != 1)
+        return 0;
     limparEntrada();
 
     /* ---------------- NOVO JOGO OU JOGO SALVO ---------------- */
 
-    if (strcmp(opcao, "2") == 0) {
-        // opção de carregar jogo salvo
-        printf("Digite o nome do arquivo: ");
-        scanf("%99s", arquivo);
-        limparEntrada();
-
-        // carrega o jogo do arquivo
-        carregarJogo(arquivo, nome1, nome2, tab, &jogadorAtual);
-    } else {
+    if(strcmp(opcao, "1") == 0)
+    {
         // opção de novo jogo
         printf("Digite o nome do Jogador 1 (brancas - 'o'): ");
         fgets(nome1, sizeof(nome1), stdin);
@@ -117,59 +116,101 @@ int main() {
         jogadorAtual = 'o';
     }
 
+    else if (strcmp(opcao, "2") == 0)
+    {
+        // opção de carregar jogo salvo
+        printf("Digite o nome do arquivo: ");
+        scanf("%99s", arquivo);
+        limparEntrada();
+
+        // carrega o jogo do arquivo
+        carregarJogo(arquivo, nome1, nome2, tab, &jogadorAtual);
+    }
+    
+
+    else{
+        // --- CASO INVÁLIDO: DIGITOU QUALQUER OUTRA COISA ---
+        printf("Opcao invalida! O programa sera encerrado.\n");
+        
+        // O "return 0" aqui mata a função main imediatamente.
+        // O computador NUNCA vai chegar no while(1) lá embaixo.
+        return 0;
+        
+    }
+    
     // imprime o tabuleiro inicial
     imprimirTabuleiro(tab);
 
     /* ---------------- LOOP PRINCIPAL DO JOGO ---------------- */
 
-    while (1) {
-        char entrada[100];   // linha digitada pelo usuário
-        char origem[10];     // casa de origem (ex: C3)
-        char destino[10];    // casa de destino (ex: D4)
+    while (1)
+    {
+        char entrada[100]; // linha digitada pelo usuário
+        char origem[10];   // casa de origem (ex: C3)
+        char destino[10];  // casa de destino (ex: D4)
 
         // mostra de quem é a vez
         printf("%s (%c), digite sua jogada (ex: C3 D4) ou 'salvar'/'sair': ",
                (jogadorAtual == 'o') ? nome1 : nome2,
                jogadorAtual);
 
-        // lê a linha inteira
+        // le a jogada feita por nome1 ou nome2
+        // O jogo pausa e espera o usuário digitar qualquer coisa e dar ENTER.
+        // Se fgets falhar (erro grave de sistema),
+        // o break encerra o jogo imediatamente
         if (!fgets(entrada, sizeof(entrada), stdin))
             break;
 
-        // remove o '\n' do final
+        /*O Problema: Quando você digita "C3 D4" e dá Enter, o computador 
+        recebe "C3 D4\n".A Solução: Essa linha procura onde está o \n 
+        (o Enter) e o substitui por um 0 (que em C indica o fim da string).
+         Agora a string é apenas "C3 D4".*/
         entrada[strcspn(entrada, "\n")] = 0;
 
         // ignora linha vazia
-        if (strlen(entrada) == 0) continue;
+        if (strlen(entrada) == 0)
+            continue;
 
         /* ---------------- COMANDOS ESPECIAIS ---------------- */
 
         // comando para sair do jogo
-        if (strcmp(entrada, "sair") == 0) {
+        //verifica se a entrada digita é "sair"
+        if (strcmp(entrada, "sair") == 0)
+        {
             printf("Encerrando o jogo. Ate mais!\n");
             break;
         }
 
         // comando para salvar o jogo
-        if (strcmp(entrada, "salvar") == 0) {
+        //verifica se a entrada digita é "salvar"
+        if (strcmp(entrada, "salvar") == 0)
+        {
             printf("Digite o nome do arquivo para salvar: ");
             scanf("%99s", arquivo);
             limparEntrada();
 
+            
             salvarJogo(arquivo, nome1, nome2, tab, jogadorAtual);
+
+            /*Usa continue. Por quê? Porque se ele salvou, ele não fez
+             um movimento de peça. O continue faz o loop voltar ao topo 
+             imediatamente, pulando todo o resto do código abaixo.*/
             continue;
         }
 
         /* ---------------- LEITURA DA JOGADA ---------------- */
 
-        // tenta extrair duas palavras da entrada (origem e destino)
-        if (sscanf(entrada, "%9s %9s", origem, destino) != 2) {
+        // Tenta separar a entrada em duas palavras (ex: "C3" e "D4").
+        // Se não encontrar exatamente duas palavras, considera erro.
+        if (sscanf(entrada, "%9s %9s", origem, destino) != 2)
+        {
             printf("Entrada invalida. Use: C3 D4\n");
             continue;
         }
 
         // valida formato das casas
-        if (!validarCasa(origem) || !validarCasa(destino)) {
+        if (!validarCasa(origem) || !validarCasa(destino))
+        {
             printf("Formato invalido. Use casas de A1 ate H8.\n");
             continue;
         }
@@ -184,13 +225,15 @@ int main() {
         // 3 -> captura múltipla continua
         int res = executarJogada(tab, origem, destino, jogadorAtual);
 
-        if (res == 0) {
+        if (res == 0)
+        {
             printf("Jogada invalida!\n");
             continue;
         }
 
         // captura múltipla: mesmo jogador continua com a mesma peça
-        if (res == 3) {
+        if (res == 3)
+        {
             printf("Captura realizada! Continue capturando com a MESMA peça.\n");
             continue;
         }
@@ -199,20 +242,25 @@ int main() {
         imprimirTabuleiro(tab);
 
         // troca de jogador após movimento simples ou fim de captura
-        if (res == 1 || res == 2) {
+        if (res == 1 || res == 2)
+        {
             jogadorAtual = (jogadorAtual == 'o') ? 'x' : 'o';
         }
 
         /* ---------------- VERIFICA FIM DE JOGO ---------------- */
 
-        if (verificarVencedor(tab)) {
+        if (verificarVencedor(tab))
+        {
             int contO = 0, contX = 0;
 
             // conta peças restantes no tabuleiro
             for (int i = 0; i < 8; i++)
-                for (int j = 0; j < 8; j++) {
-                    if (tab[i][j] == 'o' || tab[i][j] == 'O') contO++;
-                    if (tab[i][j] == 'x' || tab[i][j] == 'X') contX++;
+                for (int j = 0; j < 8; j++)
+                {
+                    if (tab[i][j] == 'o' || tab[i][j] == 'O')
+                        contO++;
+                    if (tab[i][j] == 'x' || tab[i][j] == 'X')
+                        contX++;
                 }
 
             printf("=====================================\n");
@@ -232,4 +280,3 @@ int main() {
 
     return 0;
 }
-
