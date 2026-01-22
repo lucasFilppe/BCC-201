@@ -92,8 +92,7 @@ int main()
     printf("Escolha: ");
 
     // lê a opção escolhida
-    if (scanf("%9s", opcao) != 1)
-        return 0;
+    scanf("%9s", opcao);
     limparEntrada();
 
     /* ---------------- NOVO JOGO OU JOGO SALVO ---------------- */
@@ -102,11 +101,11 @@ int main()
     {
         // opção de novo jogo
         printf("Digite o nome do Jogador 1 (brancas - 'o'): ");
-        fgets(nome1, sizeof(nome1), stdin);
+        fgets(nome1, sizeof(nome1), stdin);//le o nome do jogador 1
         nome1[strcspn(nome1, "\n")] = 0; // remove '\n'
 
         printf("Digite o nome do Jogador 2 (pretas - 'x'): ");
-        fgets(nome2, sizeof(nome2), stdin);
+        fgets(nome2, sizeof(nome2), stdin);//le o nome do jogador 2
         nome2[strcspn(nome2, "\n")] = 0;
 
         // inicializa o tabuleiro no estado padrão
@@ -205,7 +204,7 @@ int main()
         if (sscanf(entrada, "%9s %9s", origem, destino) != 2)
         {
             printf("Entrada invalida. Use: C3 D4\n");
-            continue;
+            continue;//pula todo código abaixo e volta ao inicio
         }
 
         // valida formato das casas
@@ -223,16 +222,16 @@ int main()
         // 1 -> movimento simples
         // 2 -> captura finalizada
         // 3 -> captura múltipla continua
-        int res = executarJogada(tab, origem, destino, jogadorAtual);
+        int retornoDaExecucao = executarJogada(tab, origem, destino, jogadorAtual);
 
-        if (res == 0)
+        if (retornoDaExecucao == 0)
         {
             printf("Jogada invalida!\n");
             continue;
         }
 
         // captura múltipla: mesmo jogador continua com a mesma peça
-        if (res == 3)
+        if (retornoDaExecucao == 3)
         {
             printf("Captura realizada! Continue capturando com a MESMA peça.\n");
             continue;
@@ -242,7 +241,7 @@ int main()
         imprimirTabuleiro(tab);
 
         // troca de jogador após movimento simples ou fim de captura
-        if (res == 1 || res == 2)
+        if (retornoDaExecucao == 1 || retornoDaExecucao == 2)
         {
             jogadorAtual = (jogadorAtual == 'o') ? 'x' : 'o';
         }
